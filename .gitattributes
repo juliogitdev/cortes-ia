@@ -1,0 +1,10 @@
+* text=auto
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.txt text eol=lf
+*.ps1 text eol=crlf
+docs/01_visao_do_projeto.md -text
+docs/02_plano_de_desenvolvimento.md -text
+docs/03_manual_de_multiagentes_codex.md -text

@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0.0",
+  "asset": {
+    "schema_version": "1.0.0",
+    "asset_id": "asset_sample",
+    "source_uri": "synthetic://sample",
+    "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "duration_s": 120.0,
+    "tracks": [
+      "audio",
+      "video"
+    ],
+    "local_path": "storage/synthetic/sample.mp4"
+  },
+  "request": {
+    "schema_version": "1.0.0",
+    "asset_id": "asset_sample",
+    "duration_mode": "exact",
+    "target_s": 30.0,
+    "min_s": null,
+    "max_s": null,
+    "top_k": 5,
+    "niche": "conversa",
+    "instructions": null
+  },
+  "evidence": {
+    "schema_version": "1.0.0",
+    "asset_id": "asset_sample",
+    "transcript": [
+      {
+        "schema_version": "1.0.0",
+        "start_s": 40.0,
+        "end_s": 55.0,
+        "evidence_id": "speech_1",
+        "asset_id": "asset_sample",
+        "observation": "Pergunta e resposta fictícias.",
+        "interpretation": "Resposta surpreendente no exemplo.",
+        "hypothesis": null,
+        "provenance": {
+          "schema_version": "1.0.0",
+          "run_id": "run_synthetic",
+          "source_uri": "synthetic://sample",
+          "artifact_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "original_offset_s": 0.0,
+          "settings": {
+            "fixture": true
+          }
+        }
+      }
+    ],
+    "visual_events": [],
+    "audio_events": [],
+    "quality": [
+      "Fixture sintética, não resultado de modelo."
+    ],
+    "provenance": [
+      {
+        "schema_version": "1.0.0",
+        "run_id": "run_synthetic",
+        "source_uri": "synthetic://sample",
+        "artifact_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "original_offset_s": 0.0,
+        "settings": {
+          "fixture": true
+        }
+      }
+    ]
+  },
+  "candidates": [
+    {
+      "schema_version": "1.0.0",
+      "start_s": 35.0,
+      "end_s": 65.0,
+      "candidate_id": "candidate_1",
+      "asset_id": "asset_sample",
+      "features": {
+        "context": 1.0
+      },
+      "evidence_ids": [
+        "speech_1"
+      ],
+      "reasons": [
+        "Pergunta com resposta no mesmo trecho fictício."
+      ],
+      "limitations": [
+        "Sem avaliação humana ou inferência real."
+      ],
+      "rank_score": 0.82,
+      "versions": {
+        "schema_version": "1.0.0",
+        "run_id": "run_synthetic",
+        "model_version": "synthetic_baseline",
+        "rules_version": "rules_0",
+        "feature_schema": "features_0",
+        "dataset_version": "synthetic_0",
+        "settings": {
+          "fixture": true
+        }
+      },
+      "duration_compliance": "requested"
+    }
+  ],
+  "limitations": []
+}

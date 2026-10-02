@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0.0",
+  "publication": {
+    "schema_version": "1.0.0",
+    "publication_id": "publication_1",
+    "revision_id": "revision_1",
+    "platform": "fixture",
+    "account": "synthetic_account",
+    "posted_at": "2026-09-30T12:00:00Z",
+    "final_asset_id": null,
+    "publication_url": "https://example.com/video/1",
+    "external_video_id": null,
+    "editorial_status": "published"
+  },
+  "collections": [
+    {
+      "schema_version": "1.0.0",
+      "collection_id": "collection_1",
+      "publication_id": "publication_1",
+      "requested_at": "2026-10-02T12:00:00Z",
+      "started_at": "2026-10-02T12:00:01Z",
+      "finished_at": "2026-10-02T12:00:03Z",
+      "status": "partial",
+      "connector_version": "synthetic_0",
+      "request_id": "explicit_action_1",
+      "trigger": "explicit_user_action",
+      "error_code": null
+    }
+  ],
+  "snapshots": [
+    {
+      "schema_version": "1.0.0",
+      "snapshot_id": "snapshot_1",
+      "publication_id": "publication_1",
+      "collection_id": "collection_1",
+      "observed_at": "2026-10-02T12:00:02Z",
+      "age_hours": 48.00055555555556,
+      "metric_name": "views",
+      "metric_definition": "Visualizações conforme conector fictício",
+      "value": 120.0,
+      "denominator": null,
+      "source": "connector",
+      "quality": "available",
+      "source_reference": "https://example.com/video/1",
+      "reviewer": null
+    },
+    {
+      "schema_version": "1.0.0",
+      "snapshot_id": "snapshot_2",
+      "publication_id": "publication_1",
+      "collection_id": "collection_1",
+      "observed_at": "2026-10-02T12:00:02Z",
+      "age_hours": 48.00055555555556,
+      "metric_name": "retention",
+      "metric_definition": "Retenção indisponível",
+      "value": null,
+      "denominator": null,
+      "source": "connector",
+      "quality": "unavailable",
+      "source_reference": "https://example.com/video/1",
+      "reviewer": null
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "template_version": "1.0",
+  "synthetic": true,
+  "asset_id": "fixture_boundary_synthetic",
+  "content_hash": null,
+  "duration_s": 60.0,
+  "split": "technical_fixture",
+  "reviewer": "synthetic_reviewer",
+  "events": [
+    {
+      "event_id": "event_boundary_01",
+      "start_s": 28.0,
+      "end_s": 34.0,
+      "observation": "Um marcador visual aparece enquanto soa um tom.",
+      "interpretation": "Fixture destinada a verificar fronteiras e sincronização.",
+      "hypothesis": null,
+      "relevant": true,
+      "requires_context": false
+    }
+  ],
+  "private_media_path": null
+}

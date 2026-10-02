@@ -1,0 +1,29 @@
+{
+  "template_version": "1.0",
+  "synthetic": true,
+  "status": "not_run",
+  "hardware": { "gpu": null, "gpu_validation": "pending" },
+  "versions": {
+    "model": null,
+    "backend": null,
+    "driver": null,
+    "rules": null,
+    "feature_schema": null,
+    "dataset": null
+  },
+  "settings": {},
+  "asset_hashes": [],
+  "metrics": {
+    "wer": null,
+    "candidate_recall": null,
+    "usable_top5_mean": null,
+    "max_timestamp_error_s": null,
+    "export_duration_error_s": null,
+    "elapsed_s": null,
+    "peak_vram_bytes": null,
+    "peak_ram_bytes": null,
+    "disk_bytes": null
+  },
+  "measurement_method": null,
+  "limitations": ["Template: nenhum resultado medido."]
+}

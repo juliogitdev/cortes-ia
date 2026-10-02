@@ -1,0 +1,63 @@
+{
+  "observed_at": "2026-10-02T15:39:36.521219+00:00",
+  "device": "cpu",
+  "fixture": "synthetic speech and test video; not editorial benchmark",
+  "status": "passed",
+  "versions": {
+    "faster-whisper": "1.2.1",
+    "ctranslate2": "4.8.2",
+    "fastapi": "0.142.2",
+    "streamlit": "1.64.0"
+  },
+  "gpu_validation": "pending on PC; no VRAM used/measured",
+  "memory_measurement": {
+    "method": "Windows GetProcessMemoryInfo.PeakWorkingSetSize",
+    "peak_working_set_bytes": 250023936,
+    "scope": "entire process lifetime RAM including libraries; not VRAM"
+  },
+  "asset_hash": "sha256:c6171b25ec95994790fe5467953ddf8f63d5cfdf9c53e02d2bcdc94316d19a90",
+  "speech_provenance": {
+    "device": "cpu",
+    "compute_type": "int8",
+    "language": "pt",
+    "word_timestamps": true,
+    "beam_size": 5,
+    "temperature": 0.0,
+    "vad_filter": false,
+    "local_files_only": true,
+    "faster_whisper_version": "1.2.1",
+    "ctranslate2_version": "4.8.2",
+    "elapsed_s": 1.5503660999966087,
+    "offset_policy": "full original audio; offset zero",
+    "model_identity": {
+      "model_bin_sha256": "sha256:dcb76c6586fc06cbdac6dd21f14cfd129cc4cdd9dce19bf4ffa62e59cbe6e6d1",
+      "repo": "Systran/faster-whisper-tiny",
+      "revision": "d90ca5fe260221311c53c58e660288d3deb8d356"
+    },
+    "model_hash_timing": "excluded from elapsed_s",
+    "memory_measurement": {
+      "method": "Windows GetProcessMemoryInfo.PeakWorkingSetSize",
+      "peak_working_set_bytes": 250023936,
+      "scope": "entire process lifetime RAM including libraries; not VRAM"
+    }
+  },
+  "recognized_segments": 2,
+  "candidate_count": 1,
+  "export": {
+    "schema_version": "1.0.0",
+    "export_id": "export-de51b0094c6ddbd3b4506b04fb192691862fd8986187e71090b3f4d88f0f4d14",
+    "revision_id": "e9e4e0791ce2460da8b398ecc186e500",
+    "asset_id": "asset-fe35c23d-7acf-4210-9ddf-b02d350bd281-c6171b25ec95994790fe5467953ddf8f63d5cfdf9c53e02d2bcdc94316d19a90",
+    "duration_s": 20.0,
+    "content_hash": "sha256:34e4213b3d39efd0dd6060d8a471f574d0925d4e9f45cb9cbc203026a283699e"
+  },
+  "download_bytes": 1000893,
+  "total_elapsed_s": 5.928944699990097,
+  "hardware": {
+    "os": "Windows 11 Pro x64",
+    "cpu": "AMD Ryzen 7 5700U",
+    "ram_bytes": 14875422720,
+    "cuda": "not accessed"
+  },
+  "command": "python scripts/smoke_local.py --video storage/demo/demo-clean.mp4 --storage storage/smoke-clean --output runtime/diagnostics/local-smoke-clean.json"
+}

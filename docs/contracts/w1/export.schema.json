@@ -1,0 +1,51 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0",
+      "default": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "export_id": {
+      "minLength": 1,
+      "title": "Export Id",
+      "type": "string"
+    },
+    "revision_id": {
+      "minLength": 1,
+      "title": "Revision Id",
+      "type": "string"
+    },
+    "asset_id": {
+      "minLength": 1,
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "local_path": {
+      "minLength": 1,
+      "title": "Local Path",
+      "type": "string"
+    },
+    "duration_s": {
+      "minimum": 0,
+      "title": "Duration S",
+      "type": "number"
+    },
+    "content_hash": {
+      "minLength": 1,
+      "title": "Content Hash",
+      "type": "string"
+    }
+  },
+  "required": [
+    "export_id",
+    "revision_id",
+    "asset_id",
+    "local_path",
+    "duration_s",
+    "content_hash"
+  ],
+  "title": "Export",
+  "type": "object"
+}
