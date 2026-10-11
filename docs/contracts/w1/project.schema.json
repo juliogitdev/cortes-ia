@@ -2,8 +2,12 @@
   "additionalProperties": false,
   "properties": {
     "schema_version": {
-      "const": "1.0.0",
-      "default": "1.0.0",
+      "default": "1.2.0",
+      "enum": [
+        "1.0.0",
+        "1.1.0",
+        "1.2.0"
+      ],
       "title": "Schema Version",
       "type": "string"
     },
@@ -34,6 +38,32 @@
       ],
       "default": null,
       "title": "Asset Id"
+    },
+    "account_open_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Account Open Id"
+    },
+    "profile_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Profile Id"
     }
   },
   "required": [

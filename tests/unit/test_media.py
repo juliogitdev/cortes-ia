@@ -6,6 +6,7 @@ import wave
 import pytest
 from clip_platform.ingestion.local import ingest_file
 from clip_platform.media.audio import extract_audio
+from clip_platform.media.signals import audio_events, visual_events
 from clip_platform.media.export import export_clip
 from clip_platform.media.tools import MediaError, content_hash, find_tool, probe, run_tool
 from clip_platform.shared import ClipRevision, Interval, MediaAsset
@@ -71,6 +72,36 @@ def test_real_ingest_pcm_and_export(synthetic, tmp_path):
     assert abs(frequency - 880) < 15
     assert content_hash(synthetic) == before
     assert not list((tmp_path / 'exports').glob('.export-*'))
+
+
+def test_observable_visual_change_and_audio_provenance(synthetic, tmp_path):
+    asset = ingest_file(synthetic, tmp_path / 'assets')
+    frames, visual_origin = visual_events(asset, sample_s=1)
+    assert any(1 <= item.start_s <= 3 for item in frames)
+    assert all(item.provenance.original_offset_s == 0 for item in frames)
+    audio_path = extract_audio(asset, tmp_path / 'observed.wav')
+    sounds, audio_origin = audio_events(asset, audio_path)
+    assert visual_origin.settings['sample_s'] == 1
+    assert audio_origin.settings['metric'] == 'RMS normalized'
+    assert all(item.start_s < item.end_s <= asset.duration_s for item in sounds)
+
+
+def test_late_seek_preserves_original_event_and_duration(tmp_path):
+    source = tmp_path / 'late-event.mp4'
+    run_tool('ffmpeg', ['-v', 'error', '-nostdin', '-y',
+        '-f', 'lavfi', '-i', 'color=c=red:s=160x120:r=25:d=8',
+        '-f', 'lavfi', '-i', 'sine=frequency=440:sample_rate=16000:duration=8',
+        '-f', 'lavfi', '-i', 'color=c=blue:s=160x120:r=25:d=2',
+        '-f', 'lavfi', '-i', 'sine=frequency=880:sample_rate=16000:duration=2',
+        '-filter_complex', '[0:v][1:a][2:v][3:a]concat=n=2:v=1:a=1[v][a]',
+        '-map', '[v]', '-map', '[a]', '-c:v', 'libx264', '-c:a', 'aac', str(source)])
+    asset = ingest_file(source, tmp_path / 'assets')
+    cut = export_clip(asset, revision(asset, start=8.2, end=9.7), tmp_path / 'exports')
+    assert abs(cut.duration_s - 1.5) <= .2
+    frame = subprocess.run([find_tool('ffmpeg'), '-v', 'error', '-i', cut.local_path,
+        '-frames:v', '1', '-f', 'rawvideo', '-pix_fmt', 'rgb24', 'pipe:1'],
+        capture_output=True, check=True, timeout=30).stdout
+    assert frame[2] > 200 and frame[0] < 30
 
 
 def test_invalid_revision_and_original_preserved(synthetic, tmp_path):
@@ -170,3 +201,15 @@ def test_renamed_local_playlist_is_rejected_before_ingestion(synthetic, tmp_path
     assert content_hash(synthetic) == digest
     assert path.read_text(encoding='utf-8') == text
     assert not list((tmp_path / 'assets').iterdir())
+
+
+def test_centered_web_player_needs_dark_gutter_and_active_video():
+    import numpy as np
+    from clip_platform.media.presentation import _has_centered_web_video
+
+    frame = np.zeros((1080, 1920, 3), dtype=np.uint8)
+    frame[200:930, 580:1040] = np.random.default_rng(12).integers(
+        25, 225, (730, 460, 3), dtype=np.uint8)
+    assert _has_centered_web_video(frame)
+    frame[200:930, 1152:1344] = 120
+    assert not _has_centered_web_video(frame)

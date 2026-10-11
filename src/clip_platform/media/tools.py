@@ -2,9 +2,12 @@
 import hashlib
 import json
 import os
+import queue
 from pathlib import Path
 import shutil
 import subprocess
+import threading
+import time
 
 AV_DEMUXERS = 'mov,matroska,webm,avi,mpegts,mpeg'
 
@@ -47,6 +50,57 @@ def run_tool(name: str, arguments: list[str], timeout: float = 300) -> str:
         raise MediaError(f'{name} could not start: {exc}') from exc
 
 
+def run_ffmpeg_progress(arguments: list[str], duration_s: float, on_progress, timeout: float):
+    """Run ffmpeg and report output timeline progress without a shell."""
+    command = [find_tool('ffmpeg'), *arguments[:-1], '-progress', 'pipe:1',
+               '-nostats', arguments[-1]]
+    try:
+        process = subprocess.Popen(command, stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT, text=True, encoding='utf-8', errors='replace')
+    except OSError as exc:
+        raise MediaError(f'ffmpeg could not start: {exc}') from exc
+    lines = queue.Queue()
+    def read_output():
+        for line in process.stdout:
+            lines.put(line.rstrip())
+        lines.put(None)
+    reader = threading.Thread(target=read_output, daemon=True)
+    reader.start()
+    deadline = time.monotonic() + timeout
+    errors = []
+    try:
+        while True:
+            if time.monotonic() > deadline:
+                raise MediaError(f'ffmpeg timed out after {timeout}s')
+            try:
+                line = lines.get(timeout=.5)
+            except queue.Empty:
+                continue
+            if line is None:
+                break
+            if line.startswith('out_time='):
+                try:
+                    hours, minutes, seconds = line[9:].split(':')
+                    elapsed = int(hours) * 3600 + int(minutes) * 60 + float(seconds)
+                    if duration_s > 0:
+                        on_progress(min(1., max(0., elapsed / duration_s)))
+                except (ValueError, TypeError):
+                    pass
+            elif line and not line.startswith(('frame=', 'fps=', 'stream_', 'bitrate=',
+                    'total_size=', 'out_time_us=', 'out_time_ms=', 'dup_frames=',
+                    'drop_frames=', 'speed=', 'progress=')):
+                errors.append(line)
+                errors = errors[-20:]
+        result = process.wait(timeout=max(.1, deadline - time.monotonic()))
+        if result:
+            raise MediaError(f'ffmpeg failed: {" ".join(errors)[-2000:]}')
+        on_progress(1.)
+    finally:
+        if process.poll() is None:
+            process.kill()
+            process.wait(timeout=5)
+
+
 def probe(path: Path, demuxers: str = AV_DEMUXERS) -> dict:
     path = path.resolve(strict=True)
     raw = run_tool('ffprobe', ['-v', 'error', '-protocol_whitelist', 'file,pipe',
@@ -58,11 +112,16 @@ def probe(path: Path, demuxers: str = AV_DEMUXERS) -> dict:
         raise MediaError('Invalid ffprobe JSON') from exc
 
 
-def content_hash(path: Path) -> str:
+def content_hash(path: Path, progress_callback=None) -> str:
     digest = hashlib.sha256()
+    total = path.stat().st_size if progress_callback else 0
+    processed = 0
     with path.open('rb') as stream:
         for chunk in iter(lambda: stream.read(1024 * 1024), b''):
             digest.update(chunk)
+            if progress_callback:
+                processed += len(chunk)
+                progress_callback(min(1., processed / total) if total else 1.)
     return 'sha256:' + digest.hexdigest()
 
 

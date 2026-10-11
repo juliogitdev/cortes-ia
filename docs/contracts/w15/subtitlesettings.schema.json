@@ -1,0 +1,75 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "1.1.0",
+      "enum": [
+        "1.0.0",
+        "1.1.0"
+      ],
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "enabled": {
+      "default": false,
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "style": {
+      "const": "yellow_pop",
+      "default": "yellow_pop",
+      "title": "Style",
+      "type": "string"
+    },
+    "position": {
+      "default": "bottom",
+      "enum": [
+        "bottom",
+        "middle"
+      ],
+      "title": "Position",
+      "type": "string"
+    },
+    "max_words_per_line": {
+      "default": 4,
+      "maximum": 6,
+      "minimum": 2,
+      "title": "Max Words Per Line",
+      "type": "integer"
+    },
+    "font_scale": {
+      "default": 1.0,
+      "maximum": 1.5,
+      "minimum": 0.7,
+      "title": "Font Scale",
+      "type": "number"
+    },
+    "text_color": {
+      "default": "#FFFFFF",
+      "pattern": "^#[0-9A-Fa-f]{6}$",
+      "title": "Text Color",
+      "type": "string"
+    },
+    "highlight_color": {
+      "default": "#FFFF00",
+      "pattern": "^#[0-9A-Fa-f]{6}$",
+      "title": "Highlight Color",
+      "type": "string"
+    },
+    "outline_color": {
+      "default": "#000000",
+      "pattern": "^#[0-9A-Fa-f]{6}$",
+      "title": "Outline Color",
+      "type": "string"
+    },
+    "outline_width": {
+      "default": 5,
+      "maximum": 8,
+      "minimum": 0,
+      "title": "Outline Width",
+      "type": "integer"
+    }
+  },
+  "title": "SubtitleSettings",
+  "type": "object"
+}

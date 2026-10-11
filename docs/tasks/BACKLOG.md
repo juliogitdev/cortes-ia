@@ -5,8 +5,18 @@ Ondas 2–6 seguem como planejamento. Áreas/delegação W1 em W1-delegacao.md, 
 Coordenador possui shared, migrações, dependências e lockfile; nenhum agente paralelo escreve na mesma área.
 
 Checkpoint W1: W1-00 a W1-07 integrados; W1-08 tem fluxo técnico real CPU em mídia artificial, mais testes de API/painel/fila e mídia.
+W2 inicial: usuário escolheu YouTube como live de referência; downloader extensível com cinco domínios,
+fila/API/painel e melhor qualidade padrão implementados. Contrato e relato em W2; prova de download
+integral real ainda pendente. Não considerar W2-02/W2-03 aceitos em fonte real até essa prova.
 Aceite editorial em uma live representativa e benchmark RTX continuam pendentes. Transcrição simulada em testes automatizados
 é distinguida da prova real Whisper tiny registrada em docs/evidence. Coleta de links só na onda 2.
+
+Atualização W3 (02/10/2026): avaliação automática da live antiga encontrou 257/291 segmentos
+repetitivos com tiny; Whisper small foi preparado e uma nova análise da live com faixa 25–65 s
+foi concluída após reinício. Comparação automática: small produziu 1/3169 segmentos
+repetitivos e cinco MP4s dentro da faixa; revisão humana continua pendente. Sinais observáveis de
+quadro e energia sonora, melhorias de limite e workspace visual foram implementados;
+isso não equivale a entendimento visual semântico nem ao aceite W3-01 a W3-04 completos.
 
 ## Onda 0 — preparação
 

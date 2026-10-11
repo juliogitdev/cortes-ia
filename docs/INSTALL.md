@@ -20,11 +20,17 @@ if (-not (Test-Path '.venv\Scripts\python.exe')) { python -m venv .venv }
 & .\.venv\Scripts\python.exe -m pip install --no-deps --no-build-isolation -e .
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap_media.ps1
 & .\.venv\Scripts\python.exe scripts/prepare_speech_model.py --revision d90ca5fe260221311c53c58e660288d3deb8d356
+Set-Location frontend
+npm ci
+npm run build
+Set-Location ..
+
 & .\.venv\Scripts\python.exe -m pytest
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/diagnose.ps1
 ```
 
-O lock runtime fixa as dependências testadas no notebook, incluindo API/painel/fala CPU e testes. O lock foundation guarda o checkpoint mínimo da onda 0;
+O lock runtime fixa as dependências Python; `frontend/package-lock.json` fixa o frontend React.
+Node.js é necessário para construir e iniciar o painel local. Para YouTube com todos os formatos disponíveis, confirme `node --version` no PATH da sessão. `yt-dlp` e `yt-dlp-ejs` vêm do lock; FFmpeg une vídeo e áudio. O lock foundation guarda o checkpoint mínimo da onda 0;
 ele sozinho não instala a aplicação atual. Modelos e ferramentas não vêm no clone: os dois comandos explícitos acima baixam Whisper tiny (~75 MB de pesos)
 e FFmpeg/ffprobe portable 9.0.2, com versão/revisão/hash registrados, sem instalação global.
 Não inclua o .venv do notebook no Git; recrie no PC. RAM/tempo CPU não comprovam compatibilidade CUDA.
@@ -49,6 +55,33 @@ Resultados locais ficam em runtime/diagnostics, fora do Git. CPU usa int8; CUDA,
 
 ## Preparar a máquina com a RTX (pendente)
 
+### Fala na RTX 5060 deste PC (validada em 02/10/2026)
+
+O PC atual tem RTX 5060 de 8151 MiB, driver 617.14 e capacidade 12.0. CTranslate2 4.8.2
+reconheceu a GPU, mas a primeira inferência falhou por falta de `cublas64_12.dll`.
+Foi criado `.venv-gpu` isolado e instaladas as bibliotecas oficiais NVIDIA fixadas em
+`requirements-gpu-windows.lock.txt`. O adaptador registra as DLLs do próprio venv no Windows.
+Fala real em CUDA/float16 foi executada em amostra de 10 s da gravação de referência:
+2 segmentos em 8,39 s incluindo carregamento, sem fallback CPU. Uma amostra de tom de 3 s
+também concluiu; pico de VRAM total amostrada por `nvidia-smi`: 3414 MiB, baseline 3175 MiB.
+Isso valida a fala neste ambiente, não a visão/Qwen nem qualidade editorial.
+
+Para reproduzir a configuração de fala em outro PC Windows compatível:
+
+```powershell
+python -m venv .venv-gpu
+& .\.venv-gpu\Scripts\python.exe -m pip install -r requirements-gpu-windows.lock.txt
+& .\.venv-gpu\Scripts\python.exe -m pip install --no-deps --no-build-isolation -e .
+& .\.venv-gpu\Scripts\python.exe scripts/prepare_speech_model.py --repo Systran/faster-whisper-small --destination models/whisper-small
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start_local.ps1 -Device cuda -Model models/whisper-small
+```
+
+O helper usa `.venv` para API/painel e `.venv-gpu` para o worker quando `-Device cuda`.
+As bibliotecas NVIDIA permanecem fora do Git. `runtime/local-settings.json` pode conter
+`{"device":"cuda","model":"models/whisper-small"}` para que `start_local.ps1`
+sem parâmetros use CUDA e o modelo maior apenas neste computador.
+Mantenha `-Device cpu` para executar sem o backend validado. Um novo host ainda exige prova real.
+
 1. Execute `scripts/diagnose.ps1` no host que contém fisicamente a RTX. Confirme `nvidia-smi`, driver, memória e capacidade de computação; reconhecimento do nome não é aceite CUDA.
 2. Instale FFmpeg/ffprobe por distribuição indicada no [site oficial](https://ffmpeg.org/download.html), adicione a pasta `bin` ao PATH da sessão e confirme `ffmpeg -version` e `ffprobe -version`. Preserve o PATH existente.
 3. Use ambiente GPU separado, `.venv-gpu`, mantendo a fundação. No [seletor oficial do PyTorch](https://pytorch.org/get-started/locally/), escolha Windows/Pip/Python e CUDA suportada pelo driver e arquitetura. Substitua o executável `pip` do comando apresentado por `.\.venv-gpu\Scripts\python.exe -m pip`. Não usar uma versão CUDA inferida apenas pelo nome RTX.
@@ -69,3 +102,13 @@ O script exige GPU CUDA e todos os arquivos locais; não baixa modelos e não us
 O relatório registra versões, driver, modelo/caminho, hash SHA-256 do manifesto e conteúdo dos arquivos locais, hashes das amostras, dispositivo, tempo de carga+inferência e amostras de VRAM total via nvidia-smi. O hash de modelo lê todos os arquivos antes da medição; essa preparação pode demorar e não integra o tempo de inferência. Baseline é a primeira amostra disponível de cada etapa; pico amostrado é escalar, considerando todas as GPUs retornadas. Pico PyTorch refere-se à visão; CTranslate2 não usa seu alocador. Amostragem pode perder picos curtos e inclui processos externos. Compare a saída com a fala/imagem conhecidas antes de aceitar qualidade: conclusão técnica do script não mede precisão. Não persiste transcrição nem texto visual para evitar dados privados; preserve apenas evidências autorizadas em área local.
 
 Fontes primárias consultadas em 02/10/2026. Comandos de instalação GPU continuam pendentes até acessar o host correto e conferir sua compatibilidade real.
+
+## Enquadramento vertical com detecção de rostos
+
+No PC que exporta os cortes verticais, instale o modelo YuNet oficial do OpenCV Zoo:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/install_face_model.ps1
+```
+
+O script confere SHA-256 e armazena o modelo em `models/` (ignorado pelo Git). Sem o modelo, a exportação preserva o quadro inteiro em fundo desfocado para não cortar rostos por palpite. Fonte: [OpenCV Zoo — YuNet](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet).

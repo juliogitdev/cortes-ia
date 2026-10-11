@@ -82,7 +82,36 @@ class EvidenceBundle(Contract):
         return self
 
 
+class SubtitleSettings(Contract):
+    schema_version: Literal['1.0.0', '1.1.0'] = '1.1.0'
+    enabled: bool = False
+    style: Literal['yellow_pop'] = 'yellow_pop'
+    position: Literal['bottom', 'middle'] = 'bottom'
+    max_words_per_line: int = Field(default=4, ge=2, le=6)
+    font_scale: float = Field(default=1.0, ge=.7, le=1.5)
+    text_color: Annotated[str, Field(pattern=r'^#[0-9A-Fa-f]{6}$')] = '#FFFFFF'
+    highlight_color: Annotated[str, Field(pattern=r'^#[0-9A-Fa-f]{6}$')] = '#FFFF00'
+    outline_color: Annotated[str, Field(pattern=r'^#[0-9A-Fa-f]{6}$')] = '#000000'
+    outline_width: int = Field(default=5, ge=0, le=8)
+
+
+class SubtitleWord(Interval):
+    text: Annotated[str, Field(min_length=1, max_length=80)]
+
+
+class VideoSettings(Contract):
+    schema_version: Literal['1.0.0', '1.1.0'] = '1.1.0'
+    aspect: Literal['source', 'vertical', 'horizontal'] = 'source'
+    remove_silence: bool = False
+    watermark_text: str = Field(default='', max_length=80, pattern=r'^[^\r\n\x00-\x1f]*$')
+    watermark_position: Literal['top_left', 'top_right', 'bottom_left', 'bottom_right'] = 'bottom_right'
+    header_enabled: bool = False
+    header_name: str = Field(default='', max_length=60)
+    header_title: str = Field(default='', max_length=120)
+
+
 class AnalysisRequest(Contract):
+    schema_version: Literal['1.0.0', '1.1.0', '1.2.0', '1.3.0'] = '1.3.0'
     asset_id: Identifier
     duration_mode: Literal["exact", "range"]
     target_s: Positive | None = None
@@ -91,6 +120,8 @@ class AnalysisRequest(Contract):
     top_k: int = Field(ge=1, le=100)
     niche: Identifier
     instructions: str | None = None
+    subtitle_settings: SubtitleSettings = Field(default_factory=SubtitleSettings)
+    video_settings: VideoSettings = Field(default_factory=VideoSettings)
 
     @model_validator(mode="after")
     def exclusive_duration(self):
@@ -162,9 +193,11 @@ class AnalysisResult(Contract):
 
 
 class ClipRevision(Contract):
+    schema_version: Literal['1.0.0', '1.1.0'] = '1.1.0'
     revision_id: Identifier
     candidate_id: Identifier
     asset_id: Identifier
+    analysis_id: Identifier | None = None
     boundaries: Interval
     editor_changes: list[str]
     parent_revision_id: Identifier | None = None
@@ -175,11 +208,57 @@ class Publication(Contract):
     revision_id: Identifier
     platform: Identifier
     account: Identifier
+    account_open_id: Identifier | None = None
     posted_at: AwareDatetime
     final_asset_id: Identifier | None = None
-    publication_url: Annotated[str, Field(pattern=r"^https?://[^\s]+$")]
+    publication_url: Annotated[str, Field(pattern=r"^https?://[^\s]+$")] | None
     external_video_id: Identifier | None = None
+    link_type: Literal["manual", "automatic"] = "manual"
+    publish_id: Identifier | None = None
     editorial_status: Literal["published"] = "published"
+
+    @model_validator(mode="after")
+    def link_source(self):
+        if self.link_type == "manual" and not self.publication_url:
+            raise ValueError("vínculo manual exige URL da publicação")
+        if self.link_type == "automatic" and not self.publish_id:
+            raise ValueError("vínculo automático exige publish_id")
+        return self
+
+
+class TikTokPublishAttempt(Contract):
+    attempt_id: Identifier
+    request_id: Identifier
+    revision_id: Identifier
+    export_id: Identifier
+    account_open_id: Identifier
+    account_name: Identifier
+    caption: str
+    privacy_level: Identifier
+    requested_at: AwareDatetime
+    updated_at: AwareDatetime
+    status: Literal["requested", "scheduled", "uploading", "processing", "completed", "failed", "cancelled"]
+    scheduled_at: AwareDatetime | None = None
+    batch_id: Identifier | None = None
+    disable_comment: bool = False
+    disable_duet: bool = False
+    disable_stitch: bool = False
+    publish_id: Identifier | None = None
+    external_video_id: Identifier | None = None
+    publication_id: Identifier | None = None
+    error_code: Identifier | None = None
+
+    @model_validator(mode="after")
+    def lifecycle(self):
+        if self.updated_at < self.requested_at:
+            raise ValueError("atualização anterior ao pedido")
+        if self.status in {"processing", "completed"} and not self.publish_id:
+            raise ValueError("processamento exige publish_id")
+        if self.status == "completed" and not self.publication_id:
+            raise ValueError("publicação concluída exige vínculo")
+        if self.status == "failed" and not self.error_code:
+            raise ValueError("falha exige motivo")
+        return self
 
 
 class PublicationCollectionRun(Contract):
@@ -191,7 +270,7 @@ class PublicationCollectionRun(Contract):
     status: Literal["requested", "collecting", "completed", "partial", "failed"]
     connector_version: Identifier
     request_id: Identifier
-    trigger: Literal["explicit_user_action"]
+    trigger: Literal["explicit_user_action", "authorized_session_start"]
     error_code: Identifier | None = None
 
     @model_validator(mode="after")

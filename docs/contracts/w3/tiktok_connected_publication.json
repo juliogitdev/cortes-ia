@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0.0",
+  "publication_id": "publication_example",
+  "revision_id": "revision_example",
+  "platform": "tiktok",
+  "account": "Conta Exemplo",
+  "account_open_id": "open-id-example",
+  "posted_at": "2026-10-02T12:00:00-03:00",
+  "final_asset_id": null,
+  "publication_url": "https://www.tiktok.com/@exemplo/video/1234567890123456789",
+  "external_video_id": "1234567890123456789",
+  "link_type": "manual",
+  "publish_id": null,
+  "editorial_status": "published"
+}

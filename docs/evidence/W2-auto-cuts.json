@@ -1,0 +1,62 @@
+{
+  "observed_at_utc": "2026-10-02T18:16:50.079556+00:00",
+  "source": "user-provided YouTube recording y-KdHRZ9Ggo",
+  "analysis_id": "9bbd31ca-46cf-47a8-9b5b-1a309d4c8e23",
+  "profile": "H.264 CRF 18 medium, AAC 256k, source resolution",
+  "clips": [
+    {
+      "candidate_id": "candidate_27a8c1882bd7c49bec6a",
+      "original_start_s": 6299.26,
+      "original_end_s": 6329.26,
+      "requested_duration_s": 30.0,
+      "export_duration_s": 30.03,
+      "export_bytes": 11795693,
+      "frame_mae_at_plus_1_s": 0.22,
+      "job_status": "completed"
+    },
+    {
+      "candidate_id": "candidate_eee709a3fca89d98f703",
+      "original_start_s": 6866.4400000000005,
+      "original_end_s": 6896.4400000000005,
+      "requested_duration_s": 30.0,
+      "export_duration_s": 30.03,
+      "export_bytes": 14265100,
+      "frame_mae_at_plus_1_s": 1.64,
+      "job_status": "completed"
+    },
+    {
+      "candidate_id": "candidate_768efe8f7c6acd93690a",
+      "original_start_s": 2721.9,
+      "original_end_s": 2751.9,
+      "requested_duration_s": 30.0,
+      "export_duration_s": 30.03,
+      "export_bytes": 12480757,
+      "frame_mae_at_plus_1_s": 2.99,
+      "job_status": "completed"
+    },
+    {
+      "candidate_id": "candidate_6fe6a53693b4ce2ecccf",
+      "original_start_s": 917.38,
+      "original_end_s": 947.38,
+      "requested_duration_s": 30.0,
+      "export_duration_s": 30.03,
+      "export_bytes": 10838345,
+      "frame_mae_at_plus_1_s": 0.19,
+      "job_status": "completed"
+    },
+    {
+      "candidate_id": "candidate_edf5802ecd242501967f",
+      "original_start_s": 947.78,
+      "original_end_s": 977.78,
+      "requested_duration_s": 30.0,
+      "export_duration_s": 30.03,
+      "export_bytes": 12068808,
+      "frame_mae_at_plus_1_s": 0.14,
+      "job_status": "completed"
+    }
+  ],
+  "limitations": [
+    "Frame MAE compares 160x90 RGB frames at one second into each candidate; it is an alignment check, not an editorial quality score.",
+    "Export duration includes container/audio rounding; tolerance is 0.2 s."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "attempt_id": "attempt_example",
+  "request_id": "action_example",
+  "revision_id": "revision_example",
+  "export_id": "export_example",
+  "account_open_id": "open-id-example",
+  "account_name": "Conta Exemplo",
+  "caption": "Trecho da live",
+  "privacy_level": "SELF_ONLY",
+  "requested_at": "2026-10-02T12:00:00-03:00",
+  "updated_at": "2026-10-02T12:01:00-03:00",
+  "status": "completed",
+  "publish_id": "v_pub_file~v2-1.123456789",
+  "external_video_id": null,
+  "publication_id": "publication_auto_example",
+  "error_code": null
+}

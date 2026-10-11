@@ -1,0 +1,48 @@
+{
+  "$defs": {
+    "DownloadSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "quality": {
+          "default": "best",
+          "pattern": "^(best|up_to_height)$",
+          "title": "Quality",
+          "type": "string"
+        },
+        "max_height": {
+          "anyOf": [
+            {
+              "maximum": 4320,
+              "minimum": 144,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Height"
+        }
+      },
+      "title": "DownloadSettings",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "url": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "title": "Url",
+      "type": "string"
+    },
+    "settings": {
+      "$ref": "#/$defs/DownloadSettings"
+    }
+  },
+  "required": [
+    "url"
+  ],
+  "title": "DownloadRequest",
+  "type": "object"
+}

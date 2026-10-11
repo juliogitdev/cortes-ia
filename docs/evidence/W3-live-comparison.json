@@ -1,0 +1,147 @@
+{
+  "analyses": [
+    {
+      "analysis_id": "9bbd31ca-46cf-47a8-9b5b-1a309d4c8e23",
+      "duration_mode": "exact",
+      "speech_model": "Systran/faster-whisper-tiny",
+      "asset_duration_s": 6994.38,
+      "transcript_segments": 291,
+      "repetitive_segments": 257,
+      "visual_events": 0,
+      "audio_events": 0,
+      "quality_notes": [
+        "Transcrição automática não revisada; baseline de fala."
+      ],
+      "candidates": [
+        {
+          "candidate_id": "candidate_27a8c1882bd7c49bec6a",
+          "start_s": 6299.26,
+          "end_s": 6329.26,
+          "duration_s": 30.0,
+          "boundary_signals": 0,
+          "opening_signal": null,
+          "continuation_suggested": null,
+          "visual_changes": 0,
+          "audio_energy_events": 0
+        },
+        {
+          "candidate_id": "candidate_eee709a3fca89d98f703",
+          "start_s": 6866.44,
+          "end_s": 6896.44,
+          "duration_s": 30.0,
+          "boundary_signals": 0,
+          "opening_signal": null,
+          "continuation_suggested": null,
+          "visual_changes": 0,
+          "audio_energy_events": 0
+        },
+        {
+          "candidate_id": "candidate_768efe8f7c6acd93690a",
+          "start_s": 2721.9,
+          "end_s": 2751.9,
+          "duration_s": 30.0,
+          "boundary_signals": 0,
+          "opening_signal": null,
+          "continuation_suggested": null,
+          "visual_changes": 0,
+          "audio_energy_events": 0
+        },
+        {
+          "candidate_id": "candidate_6fe6a53693b4ce2ecccf",
+          "start_s": 917.38,
+          "end_s": 947.38,
+          "duration_s": 30.0,
+          "boundary_signals": 0,
+          "opening_signal": null,
+          "continuation_suggested": null,
+          "visual_changes": 0,
+          "audio_energy_events": 0
+        },
+        {
+          "candidate_id": "candidate_edf5802ecd242501967f",
+          "start_s": 947.78,
+          "end_s": 977.78,
+          "duration_s": 30.0,
+          "boundary_signals": 0,
+          "opening_signal": null,
+          "continuation_suggested": null,
+          "visual_changes": 0,
+          "audio_energy_events": 0
+        }
+      ],
+      "scope": "automated measurements only; editorial quality needs human review"
+    },
+    {
+      "analysis_id": "5a790596-ff41-450a-947c-7de3025b7bf1",
+      "duration_mode": "range",
+      "speech_model": "Systran/faster-whisper-small",
+      "asset_duration_s": 6994.38,
+      "transcript_segments": 3169,
+      "repetitive_segments": 1,
+      "visual_events": 210,
+      "audio_events": 2,
+      "quality_notes": [
+        "Transcrição automática não revisada; baseline de fala.",
+        "41 palavra(s) com horário inconsistente foram omitidas; segmentos preservados."
+      ],
+      "candidates": [
+        {
+          "candidate_id": "candidate_4661470b3c54621b5f28",
+          "start_s": 2316.78,
+          "end_s": 2345.09,
+          "duration_s": 28.31,
+          "boundary_signals": 2.0,
+          "opening_signal": 1.0,
+          "continuation_suggested": 0.0,
+          "visual_changes": 4.0,
+          "audio_energy_events": 0.0
+        },
+        {
+          "candidate_id": "candidate_9406d1ce4a354e58b45b",
+          "start_s": 4282.42,
+          "end_s": 4320.95,
+          "duration_s": 38.53,
+          "boundary_signals": 2.0,
+          "opening_signal": 1.0,
+          "continuation_suggested": 0.0,
+          "visual_changes": 3.0,
+          "audio_energy_events": 0.0
+        },
+        {
+          "candidate_id": "candidate_7fc409d9bc134f4fb620",
+          "start_s": 1596.18,
+          "end_s": 1622.39,
+          "duration_s": 26.21,
+          "boundary_signals": 2.0,
+          "opening_signal": 1.0,
+          "continuation_suggested": 0.0,
+          "visual_changes": 1.0,
+          "audio_energy_events": 0.0
+        },
+        {
+          "candidate_id": "candidate_9dfd01c3dae93aa5ca9e",
+          "start_s": 5542.16,
+          "end_s": 5570.25,
+          "duration_s": 28.09,
+          "boundary_signals": 2.0,
+          "opening_signal": 1.0,
+          "continuation_suggested": 0.0,
+          "visual_changes": 3.0,
+          "audio_energy_events": 0.0
+        },
+        {
+          "candidate_id": "candidate_b0f148cacd7d2578b254",
+          "start_s": 7.3,
+          "end_s": 53.89,
+          "duration_s": 46.59,
+          "boundary_signals": 2.0,
+          "opening_signal": 1.0,
+          "continuation_suggested": 0.0,
+          "visual_changes": 3.0,
+          "audio_energy_events": 1.0
+        }
+      ],
+      "scope": "automated measurements only; editorial quality needs human review"
+    }
+  ]
+}

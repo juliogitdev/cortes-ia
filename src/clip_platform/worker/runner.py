@@ -9,12 +9,18 @@ from pathlib import Path
 import time
 import uuid
 
-from clip_platform.shared.contracts import AnalysisRequest
+from clip_platform.shared.contracts import AnalysisRequest, SubtitleSettings
 from clip_platform.services.store import Store
 from clip_platform.media.audio import extract_audio
 from clip_platform.media.export import export_clip
+from clip_platform.media.presentation import compose_clip
+from clip_platform.media.signals import audio_events, visual_events
+from clip_platform.media.affect import affective_cues
 from clip_platform.speech.transcribe import transcribe
+from clip_platform.subtitles.render import render_subtitled_clip
 from clip_platform.selection.baseline import select
+from clip_platform.ingestion.download import DownloadRequest, download_video
+from clip_platform.worker.progress import ProgressReporter
 
 
 @contextmanager
@@ -65,19 +71,104 @@ def execute_job(root, job_id, owner, model_path, device, transcriber, pipe):
 def process_job(store, job, owner, model_path, device, transcriber):
     directory = store.root / 'projects' / job.project_id / 'jobs' / job.job_id
     directory.mkdir(parents=True, exist_ok=True)
+    reporter = ProgressReporter(store, job.job_id, owner)
+    if job.kind == 'download':
+        reporter.update('consultando plataforma', 0., force=True)
+        def download_progress(fraction, stage):
+            stage_fraction = (min(1., fraction / .9) if stage == 'baixando' else
+                min(1., max(0., (fraction - .9) / .09)) if stage == 'registrando gravação' else None)
+            reporter.update(stage, fraction, stage_fraction)
+        asset, _ = download_video(DownloadRequest.model_validate(job.payload), directory / 'download',
+            download_progress)
+        asset = asset.model_copy(update={'asset_id': 'asset-' + job.project_id + '-' + asset.content_hash.split(':')[1]})
+        reporter.update('finalizando importação', .99, force=True)
+        return asset.model_dump(mode='json')
     if job.kind == 'analysis':
         request = AnalysisRequest.model_validate(job.payload)
         asset = store.get_asset(request.asset_id)
-        store.set_stage(job.job_id, owner, 'preparando')
-        audio = extract_audio(asset, directory / 'audio.wav')
-        store.set_stage(job.job_id, owner, 'transcrevendo')
-        evidence = (transcriber or transcribe)(asset, audio, str(model_path), device=device)
-        store.set_stage(job.job_id, owner, 'selecionando')
-        return select(asset, evidence, request).model_dump(mode='json')
+        reporter.update('preparando áudio', 0., force=True)
+        audio = extract_audio(asset, directory / 'audio.wav',
+            lambda fraction: reporter.update('preparando áudio', .10 * fraction, fraction))
+        reporter.update('carregando modelo de fala', .10, force=True)
+        if transcriber:
+            reporter.update('transcrevendo', .10, 0., force=True)
+            evidence = transcriber(asset, audio, str(model_path), device=device)
+        else:
+            evidence = transcribe(asset, audio, str(model_path), device=device,
+                progress_callback=lambda fraction: reporter.update('transcrevendo',
+                    .10 + .72 * fraction, fraction))
+        reporter.update('observando áudio', .82, 0., force=True)
+        for detector, arguments, field in ((audio_events, (asset, audio), 'audio_events'),
+                                           (visual_events, (asset,), 'visual_events')):
+            reporter.update('observando áudio' if field == 'audio_events' else 'observando imagem',
+                .82 if field == 'audio_events' else .88, force=True)
+            try:
+                events, provenance = detector(*arguments, **({'device': device} if field == 'visual_events' else {}))
+                setattr(evidence, field, events)
+                if provenance is not None:
+                    evidence.provenance.append(provenance)
+            except Exception as exc:
+                evidence.quality.append(f'{field}: observação indisponível ({type(exc).__name__}).')
+            reporter.update('observando áudio' if field == 'audio_events' else 'observando imagem',
+                .88 if field == 'audio_events' else .94, 1., force=True)
+        reporter.update('avaliando sinais', .94, force=True)
+        cues, cue_provenance = affective_cues(asset, evidence.transcript)
+        evidence.audio_events.extend(cues)
+        evidence.provenance.append(cue_provenance)
+        reporter.update('selecionando cortes', .97, force=True)
+        result = select(asset, evidence, request).model_dump(mode='json')
+        reporter.update('finalizando análise', .99, force=True)
+        return result
     revision = store.get_revision(job.payload['revision_id'])
     asset = store.get_asset(revision.asset_id)
-    store.set_stage(job.job_id, owner, 'exportando')
-    return export_clip(asset, revision, store.root / 'projects' / job.project_id / 'exports').model_dump(mode='json')
+    reporter.update('verificando gravação', 0., force=True)
+    analysis_id = revision.analysis_id or job.payload.get('analysis_id')
+    subtitle_analysis = store.get_analysis(analysis_id) if analysis_id else None
+    subtitle_settings = (SubtitleSettings.model_validate(job.payload['subtitle_settings'])
+                         if job.payload.get('subtitle_settings') else
+                         subtitle_analysis.request.subtitle_settings if subtitle_analysis else None)
+    captions_enabled = bool(subtitle_settings and subtitle_settings.enabled)
+    def export_progress(fraction, stage):
+        bounds = {'verificando gravação': (0., .10), 'codificando corte': (.10, .85),
+            'codificando corte na GPU': (.10, .85),
+            'validando corte': (.85, .98), 'validando corte existente': (.10, .98)}
+        start, end = bounds.get(stage, (.98, 1.))
+        overall = fraction * (.70 if captions_enabled else 1.)
+        reporter.update(stage, overall, min(1., max(0., (fraction - start) / (end - start))))
+    result = export_clip(asset, revision, store.root / 'projects' / job.project_id / 'exports',
+        export_progress, device=device)
+    store.put_export(result)
+    time_map = None
+    if subtitle_analysis:
+        settings = subtitle_analysis.request.video_settings
+        if settings.aspect != 'source' or settings.remove_silence or settings.watermark_text.strip() or settings.header_enabled:
+            reporter.update('enquadrando e finalizando vídeo', .68 if captions_enabled else .86, force=True)
+            profile = None
+            project = store.get_project(job.project_id)
+            if project.profile_id:
+                try:
+                    profile = store.get_profile(project.profile_id)
+                except KeyError:
+                    pass
+            avatar = (store.root / 'profiles' / profile.profile_id / 'avatar.png') if profile else None
+            editorial = store.get_clip_editorial(analysis_id, revision.candidate_id) if analysis_id else None
+            result, time_map = compose_clip(result, settings,
+                store.root / 'projects' / job.project_id / 'exports', device=device,
+                header_name=settings.header_name or (profile.brand_name or profile.name if profile else ''),
+                header_title=editorial.headline if editorial else '', header_avatar=avatar)
+            store.put_export(result)
+    if captions_enabled:
+        reporter.update('preparando legendas', .70, 0., force=True)
+        rendered = render_subtitled_clip(result, subtitle_analysis.evidence,
+            revision.boundaries.start_s, revision.boundaries.end_s, subtitle_settings,
+            store.root / 'projects' / job.project_id / 'exports',
+            progress_callback=lambda fraction: reporter.update(
+                'gravando legendas com NVENC' if device == 'cuda' else 'gravando legendas',
+                .70 + .28 * fraction, fraction),
+            word_overrides=job.payload.get('subtitle_words'), device=device, time_map=time_map)
+        result = rendered.export
+    reporter.update('finalizando corte', .99, force=True)
+    return result.model_dump(mode='json')
 
 
 def run_once(store, model_path, device='cpu', transcriber=None, lease_s=60):

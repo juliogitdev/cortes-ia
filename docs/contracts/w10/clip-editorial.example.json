@@ -1,0 +1,7 @@
+{
+  "schema_version": "1.0.0",
+  "analysis_id": "analysis-example",
+  "candidate_id": "clip-example",
+  "caption": "Texto para publicar este corte",
+  "status": "review"
+}

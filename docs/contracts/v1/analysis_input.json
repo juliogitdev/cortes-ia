@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.3.0",
   "asset_id": "asset_sample",
   "duration_mode": "exact",
   "target_s": 30.0,
@@ -7,5 +7,27 @@
   "max_s": null,
   "top_k": 5,
   "niche": "conversa",
-  "instructions": null
+  "instructions": null,
+  "video_settings": {
+    "schema_version": "1.1.0",
+    "aspect": "vertical",
+    "remove_silence": true,
+    "watermark_text": "@meuperfil",
+    "watermark_position": "bottom_right",
+    "header_enabled": true,
+    "header_name": "@meuperfil",
+    "header_title": ""
+  },
+  "subtitle_settings": {
+    "schema_version": "1.1.0",
+    "enabled": true,
+    "style": "yellow_pop",
+    "position": "bottom",
+    "max_words_per_line": 4,
+    "font_scale": 1.0,
+    "text_color": "#FFFFFF",
+    "highlight_color": "#FFFF00",
+    "outline_color": "#000000",
+    "outline_width": 5
+  }
 }

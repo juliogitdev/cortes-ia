@@ -6,7 +6,7 @@ import pytest
 from pydantic import ValidationError
 
 from clip_platform.shared.contracts import (
-    AnalysisRequest, AnalysisResult, Feedback, Interval, MetricSnapshot,
+    AnalysisRequest, AnalysisResult, Feedback, Interval, MetricSnapshot, SubtitleSettings,
     PublicationCollectionRun, PublicationRecord,
 )
 
@@ -38,6 +38,23 @@ def test_range_request():
     data = fixture("analysis_input")
     data.update(duration_mode="range", target_s=None, min_s=20, max_s=40)
     assert AnalysisRequest.model_validate(data).min_s == 20
+
+
+def test_subtitle_request_keeps_legacy_off_and_validates_style():
+    old_payload = fixture("analysis_input")
+    old_payload.pop("subtitle_settings")
+    old_payload["schema_version"] = "1.0.0"
+    legacy = AnalysisRequest.model_validate(old_payload)
+    assert not legacy.subtitle_settings.enabled
+    enabled = legacy.model_copy(update={"subtitle_settings": SubtitleSettings(enabled=True,
+        style="yellow_pop", position="bottom", max_words_per_line=4)})
+    assert AnalysisRequest.model_validate_json(enabled.model_dump_json()).subtitle_settings.enabled
+    with pytest.raises(ValidationError):
+        SubtitleSettings(enabled=True, style="unknown")
+    old_style = SubtitleSettings.model_validate({'schema_version': '1.0.0',
+        'enabled': True, 'style': 'yellow_pop', 'position': 'bottom',
+        'max_words_per_line': 4, 'font_scale': 1.0})
+    assert old_style.highlight_color == '#FFFF00' and old_style.outline_width == 5
 
 
 @pytest.mark.parametrize("start,end", [(0, 0), (3, 2), (-1, 2), (0, float("nan")), (0, float("inf"))])

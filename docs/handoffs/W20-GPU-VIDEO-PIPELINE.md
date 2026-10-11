@@ -1,0 +1,9 @@
+# W20 — GPU nas etapas pesadas de vídeo
+
+O worker com `--device cuda` já executava transcrição no CTranslate2/CUDA e a amostragem visual por quadros chave via FFmpeg/CUDA. Nesta rodada, `media/export.py` passou a usar NVDEC para decodificar o vídeo de origem e NVENC H.264 para codificar os cortes; `subtitles/render.py` passou a usar NVDEC para decodificar o clipe e NVENC para codificar o MP4 legendado. Antes do filtro ASS, os quadros são transferidos à memória do sistema porque libass desenha na CPU. O worker transmite `device` explicitamente às duas funções. Não há fallback silencioso para `libx264` quando o modo CUDA é solicitado: erro de GPU falha o job e mantém os artefatos anteriores.
+
+O desenho da legenda ASS/libass, a codificação AAC, leitura de arquivos, hash, rede e regras editoriais continuam na CPU; não há implementação segura para afirmar GPU integral. O estágio exibido ao usuário diferencia codificação GPU e NVENC. Chaves de cache incluem o dispositivo para não confundir MP4 CPU antigo com um novo MP4 GPU.
+
+Validação local real na RTX 5060: FFmpeg anunciou `h264_nvenc` e CUDA; trecho de 32 s da live Julio cocielo foi decodificado/codificado com CUDA/NVENC e conferido por `ffprobe` (H.264/AAC, 32,000 s). O filtro ASS com NVENC também produziu H.264/AAC com a mesma duração. Smoke do módulo Python `export_clip(..., device='cuda')` e `render_subtitled_clip(..., device='cuda')` gerou dois MP4s com manifestos válidos. Suíte Python: 141 testes aprovados na integração com W21; build frontend aprovado.
+
+Fonte técnica: documentação oficial NVIDIA, “Using FFmpeg with NVIDIA GPU Hardware Acceleration” (https://docs.nvidia.com/video-technologies/video-codec-sdk/13.1/ffmpeg-with-nvidia-gpu/index.html). Esta validação é da RTX local; arquivos antigos não são recodificados automaticamente.

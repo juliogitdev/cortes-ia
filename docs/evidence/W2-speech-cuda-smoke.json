@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-02",
+  "host_gpu": "NVIDIA GeForce RTX 5060",
+  "driver": "617.14",
+  "gpu_memory_total_mib": 8151,
+  "compute_capability": "12.0",
+  "python": "3.12.10",
+  "ctranslate2": "4.8.2",
+  "faster_whisper": "1.2.1",
+  "nvidia_cublas_cu12": "12.9.2.10",
+  "nvidia_cudnn_cu12": "9.27.0.42",
+  "nvidia_cuda_nvrtc_cu12": "12.9.86",
+  "speech_model": "local whisper-tiny, CUDA float16",
+  "tests": [
+    {
+      "input": "3-second synthetic tone",
+      "status": "completed",
+      "elapsed_load_and_inference_s": 32.694,
+      "segments": 0,
+      "device_vram_baseline_sampled_mib": 3175,
+      "device_vram_peak_sampled_mib": 3414
+    },
+    {
+      "input": "10-second local excerpt of user-provided public recording at original offset 600 s",
+      "status": "completed",
+      "elapsed_load_and_inference_s": 8.39,
+      "segments": 2
+    },
+    {
+      "input": "10-second audiovisual derivative of the same excerpt",
+      "status": "worker job completed",
+      "candidates": 1,
+      "worker_device": "cuda"
+    }
+  ],
+  "limitations": [
+    "VRAM samples are total device usage and include other processes; they are not model-only allocation.",
+    "The sample is not an editorial quality benchmark or full-recording throughput measurement.",
+    "Vision model and PyTorch CUDA have not been tested."
+  ]
+}
